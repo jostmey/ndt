@@ -8,4 +8,4 @@ Dataset of direct marketing campaigns (phone calls) of a Portuguese banking inst
 
 ### Script
 
-Thescript `python3 build_dy.py` shuffles the samples, extract the features and labels, split the samples, normalize the features, and save the results. The script was run to generate the other files in this folder.
+Thescript `python3 build_db.py` shuffles the samples, extract the features and labels, split the samples, normalize the features, and save the results. The script was run to generate the other files in this folder.
