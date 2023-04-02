@@ -21,11 +21,15 @@ df = pd.read_csv('bank-full.csv', delimiter=';')
 # Convert data
 ##########################################################################################
 
+# Convert categorical variables to numerical one-hot encoded variables
+#
 for name in [ 'job', 'marital', 'education', 'contact', 'month', 'poutcome' ]:
   df_onehot = pd.get_dummies(df[name], prefix=name)
   df_drop = df.drop(columns=[ name ])
   df = pd.concat([ df_drop, df_onehot ], axis=1)
 
+# Convert binary variables to numerical variables
+#
 for name in [ 'default', 'housing', 'loan', 'y' ]:
   df_binary = df[name].eq('yes').astype('float')
   df_drop = df.drop(columns=[ name ])
@@ -45,27 +49,30 @@ ys = df['y']
 xs = df.drop(columns=[ 'y' ])
 
 ##########################################################################################
-# Normalize features
-##########################################################################################
-
-xs = (xs-xs.mean())/xs.std()
-
-##########################################################################################
 # Split data
 ##########################################################################################
 
 num = df.shape[0]
-cum_train = int(0.6*num)
-cum_val = int(0.8*num)
 
-xs_train = xs[:cum_train]
-ys_train = ys[:cum_train]
+xs_train = xs[:int(0.6*num)]
+ys_train = ys[:int(0.6*num)]
 
-xs_val = xs[cum_train:cum_val]
-ys_val = ys[cum_train:cum_val]
+xs_val = xs[int(0.6*num):int(0.8*num)]
+ys_val = ys[int(0.6*num):int(0.8*num)]
 
-xs_test = xs[cum_val:]
-ys_test = ys[cum_val:]
+xs_test = xs[int(0.8*num):]
+ys_test = ys[int(0.8*num):]
+
+##########################################################################################
+# Normalize features
+##########################################################################################
+
+means = xs_train.mean()
+stds = xs_train.std()
+
+xs_train = (xs_train-means)/stds
+xs_val = (xs_val-means)/stds
+xs_test = (xs_test-means)/stds
 
 ##########################################################################################
 # Save results
