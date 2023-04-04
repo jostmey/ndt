@@ -43,13 +43,15 @@ df_concat = pd.concat([ df, df_test ], axis=0)
 # Convert categorical variables to numerical one-hot encoded variables
 #
 for name in [ 'workclass', 'education', 'marital-status', 'occupation', 'relationship', 'race', 'native-country' ]:
+  df_concat[name] = df_concat[name].str.strip()
   df_onehot = pd.get_dummies(df_concat[name], prefix=name)
   df_drop = df_concat.drop(columns=[ name ])
   df_concat = pd.concat([ df_drop, df_onehot ], axis=1)
 
 # Convert binary variables to numerical variables
 #
-for name, one in [ ( 'sex', ' Male' ), ( 'income', ' >50K' ) ]:
+for name, one in [ ( 'sex', 'Male' ), ( 'income', '>50K' ) ]:
+  df_concat[name] = df_concat[name].str.strip()
   df_binary = df_concat[name].eq(one).astype('float')
   df_drop = df_concat.drop(columns=[ name ])
   df_concat = pd.concat([ df_drop, df_binary ], axis=1)
@@ -83,6 +85,7 @@ ys_test = ys.iloc[-num_test:]
 means = xs_train.mean()
 stds = xs_train.std()
 
+xs = (xs-means)/stds
 xs_train = (xs_train-means)/stds
 xs_val = (xs_val-means)/stds
 xs_test = (xs_test-means)/stds
