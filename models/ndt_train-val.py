@@ -79,7 +79,7 @@ loader_val = torch.utils.data.DataLoader(dataset=dataset_val, batch_size=args.ba
 num_train, num_features = xs_train.shape
 num_trees = 1
 for depth_ in range(25):
-  width_ = NCT.num_inputs(depth_, num_trees=num_trees)
+  width_ = NDT.num_inputs(depth_, num_trees=num_trees)
   if width_*(num_features+1) > num_train*num_trees:
     break
   depth = depth_
@@ -90,12 +90,12 @@ class Model(torch.nn.Module):
     super().__init__()
     self.linear = torch.nn.Linear(num_inputs, width)
     self.norm = torch.nn.BatchNorm1d(width)
-    self.nct = NCT(depth, num_trees=num_trees)
+    self.ndt = NDT(depth, num_trees=num_trees)
     self.trim = Trim()
   def forward(self, x):
     l = self.linear(x)
     n = self.norm(l)
-    p = self.nct(n)
+    p = self.ndt(n)
     t = self.trim(p)
     return t
 
