@@ -40,6 +40,11 @@ df_concat = pd.concat([ df, df_test ], axis=0)
 # Convert data
 ##########################################################################################
 
+# Remove 'Holand-Netherlands', which is not frequent enough to appear in the training dataset
+#
+df_concat['native-country'] = df_concat['native-country'].replace('Holand-Netherlands', '?')
+df_concat['native-country'] = df_concat['native-country'].replace(' Holand-Netherlands', ' ?')
+
 # Convert categorical variables to numerical one-hot encoded variables
 #
 for name in [ 'workclass', 'education', 'marital-status', 'occupation', 'relationship', 'race', 'native-country' ]:
