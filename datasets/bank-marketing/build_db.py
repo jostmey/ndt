@@ -70,7 +70,6 @@ ys_test = ys.iloc[int(0.8*num):]
 means = xs_train.mean()
 stds = xs_train.std()
 
-xs = (xs-means)/stds
 xs_train = (xs_train-means)/stds
 xs_val = (xs_val-means)/stds
 xs_test = (xs_test-means)/stds
@@ -78,9 +77,6 @@ xs_test = (xs_test-means)/stds
 ##########################################################################################
 # Save results
 ##########################################################################################
-
-xs.to_csv('xs.csv.gz', index=False, compression='gzip')
-ys.to_csv('ys.csv.gz', index=False, compression='gzip')
 
 xs_train.to_csv('xs_train.csv.gz', index=False, compression='gzip')
 ys_train.to_csv('ys_train.csv.gz', index=False, compression='gzip')
