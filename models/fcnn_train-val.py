@@ -80,14 +80,20 @@ num_train, num_features = xs_train.shape
 class Model(torch.nn.Module):
   def __init__(self, num_inputs):
     super().__init__()
-    self.linear = torch.nn.Linear(num_inputs, 1)
-    self.norm = torch.nn.BatchNorm1d(1)
-    self.act = torch.nn.Sigmoid()
+    self.linear1 = torch.nn.Linear(num_inputs, 128)
+    self.norm1 = torch.nn.BatchNorm1d(128)
+    self.act1 = torch.nn.Tanh()
+    self.linear2 = torch.nn.Linear(128, 1)
+    self.norm2 = torch.nn.BatchNorm1d(1)
+    self.act2 = torch.nn.Sigmoid()
   def forward(self, x):
-    l = self.linear(x)
-    n = self.norm(l)
-    p = self.act(n)
-    return p
+    l1 = self.linear1(x)
+    n1 = self.norm1(l1)
+    p1 = self.act1(n1)
+    l2 = self.linear2(p1)
+    n2 = self.norm2(l2)
+    p2 = self.act2(n2)
+    return p2
 
 model = Model(xs_train.shape[1]).to(device)
 

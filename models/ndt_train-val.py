@@ -23,7 +23,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--input', help='Base path with input files', type=str, required=True)
 parser.add_argument('--output', help='Filename to save the model', type=str, default=None)
 parser.add_argument('--batch', help='Batch size', type=int, default=128)
-parser.add_argument('--step', help='Step size', type=float, default=0.001)
+parser.add_argument('--step', help='Step size', type=float, default=0.01)
 parser.add_argument('--epochs', help='Number of passes over the dataset', type=int, default=1024)
 parser.add_argument('--device', help='Examples are cuda:0 or cpu', type=str, default='cpu')
 args = parser.parse_args()
@@ -85,6 +85,8 @@ for depth_ in range(25):
   depth = depth_
   width = width_
 
+print(depth)
+
 class Model(torch.nn.Module):
   def __init__(self, num_inputs):
     super().__init__()
@@ -109,7 +111,7 @@ loss = torch.nn.BCELoss()
 accuracy = torchmetrics.classification.BinaryAccuracy().to(device)
 auroc = torchmetrics.classification.BinaryAUROC().to(device)
 
-optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+optimizer = torch.optim.Adam(model.parameters(), lr=args.step)
 
 ##########################################################################################
 # Train and validate model
@@ -151,6 +153,7 @@ for i in range(args.epochs):
   )
 
 with torch.no_grad():
+  model.load_state_dict(state_best)
   ps_val = model(xs_val)
   a_val = accuracy(ps_val, ys_val)
   auroc_val = auroc(ps_val, ys_val)
