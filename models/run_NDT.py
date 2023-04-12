@@ -114,7 +114,7 @@ for lr in [ 0.1, 0.03, 0.01, 0.003, 0.001 ]:
 
     # Create model
     #
-    model = NST(num_inputs=xs_train.shape[1], tree_depth=tree_depth)
+    model = NDT(num_inputs=xs_train.shape[1], tree_depth=tree_depth)
     model = model.to(device)
 
     # For holding a bbetterest model
@@ -196,7 +196,7 @@ for lr in [ 0.1, 0.03, 0.01, 0.003, 0.001 ]:
 # Print report from hyperparameter search
 #
 with torch.no_grad():
-  model = NST(num_inputs=xs_train.shape[1], tree_depth=hyper_best['tree_depth'])
+  model = NDT(num_inputs=xs_train.shape[1], tree_depth=hyper_best['tree_depth'])
   model.load_state_dict(state_best)
   model.eval()
   ps_val = model(xs_val)
