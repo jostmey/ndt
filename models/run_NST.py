@@ -195,6 +195,7 @@ for lr in [ 0.1, 0.03, 0.01, 0.003, 0.001 ]:
 # Print report from hyperparameter search
 #
 with torch.no_grad():
+  model = NDT(num_inputs=xs_train.shape[1], tree_depth=hyper_best['tree_depth'])
   model.load_state_dict(state_best)
   ps_val = model(xs_val)
   ps_test = model(xs_test)
