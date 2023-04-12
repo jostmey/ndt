@@ -13,7 +13,7 @@ import argparse
 import pandas as pd
 import torch
 import torchmetrics
-from NDT import *
+from FCNN import *
 
 ##########################################################################################
 # Arguments
@@ -103,18 +103,18 @@ for lr in [ 0.1, 0.03, 0.01, 0.003, 0.001 ]:
 
   # Loop over different models each with different model specific hyperparameters
   #
-  for tree_depth in range(2, 10):
+  for dropout in [ 0.1, 0.25, 0.5, 0.75, 0.9 ]:
 
     # Record hyperparameters
     #
     hyper = {
      'lr': lr,
-     'tree_depth': tree_depth
+     'dropout': dropout
     }
 
     # Create model
     #
-    model = NST(num_inputs=xs_train.shape[1], tree_depth=tree_depth)
+    model = FCNN(num_inputs=xs_train.shape[1], num_hidden=128, dropout=dropout)
     model = model.to(device)
 
     # For holding a bbetterest model
@@ -196,7 +196,7 @@ for lr in [ 0.1, 0.03, 0.01, 0.003, 0.001 ]:
 # Print report from hyperparameter search
 #
 with torch.no_grad():
-  model = NST(num_inputs=xs_train.shape[1], tree_depth=hyper_best['tree_depth'])
+  model = FCNN(num_inputs=xs_train.shape[1], num_hidden=128, dropout=hyper_best['dropout'])
   model.load_state_dict(state_best)
   model.eval()
   ps_val = model(xs_val)

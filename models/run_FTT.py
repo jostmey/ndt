@@ -13,7 +13,7 @@ import argparse
 import pandas as pd
 import torch
 import torchmetrics
-from NDT import *
+from FCNN import *
 
 ##########################################################################################
 # Arguments
@@ -103,100 +103,103 @@ for lr in [ 0.1, 0.03, 0.01, 0.003, 0.001 ]:
 
   # Loop over different models each with different model specific hyperparameters
   #
-  for tree_depth in range(2, 10):
+  for attn_dropout in [ 0.1, 0.25, 0.5, 0.75, 0.9 ]:
 
-    # Record hyperparameters
-    #
-    hyper = {
-     'lr': lr,
-     'tree_depth': tree_depth
-    }
+    for ff_dropout in [ 0.1, 0.25, 0.5, 0.75, 0.9 ]:
 
-    # Create model
-    #
-    model = NST(num_inputs=xs_train.shape[1], tree_depth=tree_depth)
-    model = model.to(device)
-
-    # For holding a bbetterest model
-    #
-    i_better = -1
-    e_better = 1.0e8
-    hyper_better = {}
-    state_better = {}
-
-    # Re-initialize the optimizer
-    #
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-
-    # Print report
-    #
-    print('[NEW MODEL]', sep='\t', flush=True)
-
-    # Train and validate the model
-    #
-    for i in range(args.epochs):
-
-      # Traing model for one epoch
+      # Record hyperparameters
       #
-      e_train = 0.0
-      model.train()
-      for xs_batch, ys_batch in iter(loader_train):
-        ps_batch = model(xs_batch)
-        e_batch = loss(ps_batch, ys_batch)
-        e_train += e_batch/len(loader_train)
-        optimizer.zero_grad()
-        e_batch.backward()
-        optimizer.step()
+      hyper = {
+       'lr': lr,
+       'attn_dropout': attn_dropout,
+       'ff_dropout': ff_dropout
+      }
 
-      # Validate model
+      # Create model
       #
-      e_val = 0.0
-      model.eval()
-      with torch.no_grad():
-        for xs_batch, ys_batch in iter(loader_val):
-          ps_batch = model(xs_batch)
-          e_batch = loss(ps_batch, ys_batch)
-          e_val += e_batch/len(loader_val)
-        if e_val < e_better:
-          i_better = i
-          e_better = e_val
-          hyper_better = hyper
-          state_better = model.state_dict()
-        if e_val < e_best:
-          i_best = i
-          e_best = e_val
-          hyper_best = hyper
-          state_best = model.state_dict()
+      model = FTT(num_inputs=xs_train.shape[1], attn_dropout=attn_dropout, ff_dropout=ff_dropout)
+      model = model.to(device)
+
+      # For holding a bbetterest model
+      #
+      i_better = -1
+      e_better = 1.0e8
+      hyper_better = {}
+      state_better = {}
+
+      # Re-initialize the optimizer
+      #
+      optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
       # Print report
       #
-      print(
-        '[TRAIN]',
-        'i:', i,
-        'e_train:', float(e_train)/0.693,
-        'e_val:', float(e_val)/0.693,
-        sep='\t', flush=True
-      )
+      print('[NEW MODEL]', sep='\t', flush=True)
 
-    # Print report with early stopping
-    #
-    with torch.no_grad():
-      model.load_state_dict(state_better)
-      model.eval()
-      ps_val = model(xs_val)
-      print(
-        '[VALIDATE]',
-        'i_better:', i_better,
-        'a_val:', 100.0*float(accuracy(ps_val, ys_val)),
-        'auroc_val:', float(auroc(ps_val, ys_val)),
-        'hyper_better:', hyper_better,
-        sep='\t', flush=True
-      )
+      # Train and validate the model
+      #
+      for i in range(args.epochs):
+
+        # Traing model for one epoch
+        #
+        e_train = 0.0
+        model.train()
+        for xs_batch, ys_batch in iter(loader_train):
+          ps_batch = model(xs_batch)
+          e_batch = loss(ps_batch, ys_batch)
+          e_train += e_batch/len(loader_train)
+          optimizer.zero_grad()
+          e_batch.backward()
+          optimizer.step()
+
+        # Validate model
+        #
+        e_val = 0.0
+        model.eval()
+        with torch.no_grad():
+          for xs_batch, ys_batch in iter(loader_val):
+            ps_batch = model(xs_batch)
+            e_batch = loss(ps_batch, ys_batch)
+            e_val += e_batch/len(loader_val)
+          if e_val < e_better:
+            i_better = i
+            e_better = e_val
+            hyper_better = hyper
+            state_better = model.state_dict()
+          if e_val < e_best:
+            i_best = i
+            e_best = e_val
+            hyper_best = hyper
+            state_best = model.state_dict()
+
+        # Print report
+        #
+        print(
+          '[TRAIN]',
+          'i:', i,
+          'e_train:', float(e_train)/0.693,
+          'e_val:', float(e_val)/0.693,
+          sep='\t', flush=True
+        )
+
+      # Print report with early stopping
+      #
+      with torch.no_grad():
+        model.load_state_dict(state_better)
+        model.eval()
+        ps_val = model(xs_val)
+        print(
+          '[VALIDATE]',
+          'i_better:', i_better,
+          'a_val:', 100.0*float(accuracy(ps_val, ys_val)),
+          'auroc_val:', float(auroc(ps_val, ys_val)),
+          'hyper_better:', hyper_better,
+          sep='\t', flush=True
+        )
 
 # Print report from hyperparameter search
 #
 with torch.no_grad():
-  model = NST(num_inputs=xs_train.shape[1], tree_depth=hyper_best['tree_depth'])
+  model = FTT(num_inputs=xs_train.shape[1],, attn_dropout=hyper_best['attn_dropout'], ff_dropout=hyper_best['ff_dropout'])
   model.load_state_dict(state_best)
   model.eval()
   ps_val = model(xs_val)
