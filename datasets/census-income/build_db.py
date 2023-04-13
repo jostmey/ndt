@@ -53,6 +53,11 @@ for name in [ 'workclass', 'education', 'marital-status', 'occupation', 'relatio
   df_drop = df_concat.drop(columns=[ name ])
   df_concat = pd.concat([ df_drop, df_onehot ], axis=1)
 
+#
+#
+df_concat['income'] = df_concat['income'].replace(' <=50K.', ' <=50K')
+df_concat['income'] = df_concat['income'].replace(' >50K.', ' >50K')
+
 # Convert binary variables to numerical variables
 #
 for name, one in [ ( 'sex', 'Male' ), ( 'income', '>50K' ) ]:
