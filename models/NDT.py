@@ -15,16 +15,16 @@ class NDT(torch.nn.Module):
     self.num_forks = 2**self.tree_depth-1
     self.linear = torch.nn.Linear(num_inputs, self.num_trees*self.num_forks)
     self.norm = torch.nn.BatchNorm1d(self.num_trees*self.num_forks)
+    self.sigmoid = torch.nn.Sigmoid()
     self.epsilon = epsilon
   def forward(self, x):
     logits = self.linear(x)
     norms = self.norm(logits)
     reshapes = torch.reshape(norms, [ -1, self.num_trees, self.num_forks ])
-    sigmoids = torch.sigmoid(reshapes)
     trees_flat = torch.ones_like(reshapes[:,:,0:1])
     j = 0
     for i in range(self.tree_depth):  # Grow the trees
-      decisions1 = sigmoids[:,:,j:j+2**i]
+      decisions1 = self.sigmoid(reshapes[:,:,j:j+2**i])
       decisions = torch.stack([ 1.0-decisions1, decisions1 ], axis=3)
       trees = torch.unsqueeze(trees_flat, axis=3)*decisions  # [ batch, tree, decision, 2 ]
       width = int(trees_flat.shape[2])*2
@@ -44,17 +44,17 @@ class NST(torch.nn.Module):
     self.num_forks = 2**self.tree_depth-1
     self.linear = torch.nn.Linear(num_inputs, self.num_trees*self.num_forks)
     self.norm = torch.nn.BatchNorm1d(self.num_trees*self.num_forks)
+    self.sigmoid = torch.nn.Sigmoid()
     self.epsilon = epsilon
   def forward(self, x):
     logits = self.linear(x)
     norms = self.norm(logits)
     reshapes = torch.reshape(norms, [ -1, self.num_trees, self.num_forks ])
-    sigmoids = torch.sigmoid(reshapes)
     trees_flat = torch.ones_like(reshapes[:,:,0:1])
     j = 0
     for i in range(self.tree_depth):  # Grow the trees
       scale = 1.0/(2**(self.tree_depth-i-1))
-      decisions1 = scale*sigmoids[:,:,j:j+2**i]
+      decisions1 = self.sigmoid(scale*reshapes[:,:,j:j+2**i])
       decisions = torch.stack([ 1.0-decisions1, decisions1 ], axis=3)
       trees = torch.unsqueeze(trees_flat, axis=3)*decisions  # [ batch, tree, decision, 2 ]
       width = int(trees_flat.shape[2])*2
@@ -74,17 +74,17 @@ class NGT(torch.nn.Module):
     self.num_forks = 2**self.tree_depth-1
     self.linear = torch.nn.Linear(num_inputs, self.num_trees*self.num_forks)
     self.norm = torch.nn.BatchNorm1d(self.num_trees*self.num_forks)
+    self.sigmoid = torch.nn.Sigmoid()
     self.epsilon = epsilon
   def forward(self, x):
     logits = self.linear(x)
     norms = self.norm(logits)
     reshapes = torch.reshape(norms, [ -1, self.num_trees, self.num_forks ])
-    sigmoids = torch.sigmoid(reshapes)
     trees_flat = torch.ones_like(reshapes[:,:,0:1])
     j = 0
     for i in range(self.tree_depth):  # Grow the trees
       scale = 1.0/(2**(0.5*(self.tree_depth-i-1)))
-      decisions1 = scale*sigmoids[:,:,j:j+2**i]
+      decisions1 = self.sigmoid(scale*reshapes[:,:,j:j+2**i])
       decisions = torch.stack([ 1.0-decisions1, decisions1 ], axis=3)
       trees = torch.unsqueeze(trees_flat, axis=3)*decisions  # [ batch, tree, decision, 2 ]
       width = int(trees_flat.shape[2])*2
