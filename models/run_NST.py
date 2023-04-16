@@ -65,25 +65,23 @@ ys_test = torch.tensor(ys_test.to_numpy()).type(torch.float32).to(device)
 ##########################################################################################
 
 ws_train = 0.5*((ys_train)/torch.sum(ys_train)+(1.0-ys_train)/torch.sum(1.0-ys_train))
-ws_train = ws_train.squeeze(1)
-
 ws_val = 0.5*((ys_val)/torch.sum(ys_val)+(1.0-ys_val)/torch.sum(1.0-ys_val))
-ws_val = ws_val.squeeze(1)
+ws_test = 0.5*((ys_test)/torch.sum(ys_test)+(1.0-ys_test)/torch.sum(1.0-ys_test))
+
+ws_train = ws_train.squeeze(1)
 
 dataset_train = torch.utils.data.TensorDataset(xs_train, ys_train)
 sampler_train = torch.utils.data.WeightedRandomSampler(ws_train, len(dataset_train), replacement=True)
 loader_train = torch.utils.data.DataLoader(dataset=dataset_train, batch_size=args.batch, sampler=sampler_train, drop_last=True)
 
-dataset_val = torch.utils.data.TensorDataset(xs_val, ys_val)
-sampler_val = torch.utils.data.WeightedRandomSampler(ws_val, len(dataset_val), replacement=True)
-loader_val = torch.utils.data.DataLoader(dataset=dataset_val, batch_size=args.batch, sampler=sampler_val, drop_last=True)
-
 ##########################################################################################
 # Metrics
 ##########################################################################################
 
-loss = torch.nn.BCELoss()
-accuracy = torchmetrics.classification.BinaryAccuracy().to(device)
+loss_train = torch.nn.BCELoss()
+loss_val = torch.nn.BCELoss(weight=ws_val, reduction='sum')
+loss_test = torch.nn.BCELoss(weight=ws_test, reduction='sum')
+
 auroc = torchmetrics.classification.BinaryAUROC().to(device)
 
 ##########################################################################################
@@ -142,7 +140,7 @@ for lr in [ 0.1, 0.03, 0.01, 0.003, 0.001 ]:
       model.train()
       for xs_batch, ys_batch in iter(loader_train):
         ps_batch = model(xs_batch)
-        e_batch = loss(ps_batch, ys_batch)
+        e_batch = loss_train(ps_batch, ys_batch)
         e_train += e_batch/len(loader_train)
         optimizer.zero_grad()
         e_batch.backward()
@@ -150,23 +148,19 @@ for lr in [ 0.1, 0.03, 0.01, 0.003, 0.001 ]:
 
       # Validate model
       #
-      e_val = 0.0
       model.eval()
-      with torch.no_grad():
-        for xs_batch, ys_batch in iter(loader_val):
-          ps_batch = model(xs_batch)
-          e_batch = loss(ps_batch, ys_batch)
-          e_val += e_batch/len(loader_val)
-        if e_val < e_better:
-          i_better = i
-          e_better = e_val
-          hyper_better = hyper
-          state_better = model.state_dict()
-        if e_val < e_best:
-          i_best = i
-          e_best = e_val
-          hyper_best = hyper
-          state_best = model.state_dict()
+      ps_val = model(xs_val)
+      e_val = loss_val(ps_val, ys_val)
+      if e_val < e_better:
+        i_better = i
+        e_better = e_val
+        hyper_better = hyper
+        state_better = model.state_dict()
+      if e_val < e_best:
+        i_best = i
+        e_best = e_val
+        hyper_best = hyper
+        state_best = model.state_dict()
 
       # Print report
       #
@@ -187,7 +181,7 @@ for lr in [ 0.1, 0.03, 0.01, 0.003, 0.001 ]:
       print(
         '[VALIDATE]',
         'i_better:', i_better,
-        'a_val:', 100.0*float(accuracy(ps_val, ys_val)),
+        'e_val:', float(e_better)/0.693,
         'auroc_val:', float(auroc(ps_val, ys_val)),
         'hyper_better:', hyper_better,
         sep='\t', flush=True
@@ -201,12 +195,13 @@ with torch.no_grad():
   model.eval()
   ps_val = model(xs_val)
   ps_test = model(xs_test)
+  e_test = loss_test(ps_test, ys_test)
   print(
     '[TEST]',
     'i_best:', i_best,
-    'a_val:', 100.0*float(accuracy(ps_val, ys_val)),
+    'e_val:', float(e_best)/0.693,
     'auroc_val:', float(auroc(ps_val, ys_val)),
-    'a_test:', 100.0*float(accuracy(ps_test, ys_test)),
+    'e_test:', float(e_test)/0.693,
     'auroc_test:', float(auroc(ps_test, ys_test)),
     'hyper_best:', hyper_best,
     sep='\t', flush=True
