@@ -143,19 +143,20 @@ for lr in [ 0.1, 0.03, 0.01, 0.003, 0.001 ]:
 
     # Validate model
     #
-    model.eval()
-    ps_val = model(xs_val)
-    e_val = loss_val(ps_val, ys_val)
-    if e_val < e_better:
-      i_better = i
-      e_better = e_val
-      hyper_better = hyper
-      state_better = model.state_dict()
-    if e_val < e_best:
-      i_best = i
-      e_best = e_val
-      hyper_best = hyper
-      state_best = model.state_dict()
+    with torch.no_grad():
+      model.eval()
+      ps_val = model(xs_val)
+      e_val = loss_val(ps_val, ys_val)
+      if e_val < e_better:
+        i_better = i
+        e_better = e_val
+        hyper_better = hyper
+        state_better = model.state_dict()
+      if e_val < e_best:
+        i_best = i
+        e_best = e_val
+        hyper_best = hyper
+        state_best = model.state_dict()
 
     # Print report
     #
