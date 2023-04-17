@@ -185,7 +185,7 @@ for lr in [ 0.1, 0.03, 0.01, 0.003, 0.001 ]:
 # Print report from hyperparameter search
 #
 with torch.no_grad():
-  model = FCNN(num_inputs=xs_train.shape[1])
+  model = BLR(num_inputs=xs_train.shape[1])
   model = model.to(device)
   model.load_state_dict(state_best)
   model.eval()
