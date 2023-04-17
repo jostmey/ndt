@@ -20,6 +20,6 @@ python3 run_FCNN.py --device cuda --dataset ../datasets/bank-marketing/ --output
 python3 run_FCNN.py --device cuda --dataset ../datasets/census-income/ --output ../results/fcnn_census-income.p > ../results/fcnn_census-income.txt
 python3 run_FCNN.py --device cuda --dataset ../datasets/mnist-odd/ --output ../results/fcnn_mnist-odd.p > ../results/fcnn_mnist-odd.txt
 
-python3 run_FFT.py --device cuda --dataset ../datasets/bank-marketing/ --output ../results/fft_bank-marketing.p > ../results/fft_bank-marketing.txt
-python3 run_FFT.py --device cuda --dataset ../datasets/census-income/ --output ../results/fft_census-income.p > ../results/fft_census-income.txt
-python3 run_FFT.py --device cuda --dataset ../datasets/mnist-odd/ --output ../results/fft_mnist-odd.p > ../results/fft_mnist-odd.txt
+python3 run_FTT.py --device cuda --dataset ../datasets/bank-marketing/ --output ../results/ftt_bank-marketing.p > ../results/ftt_bank-marketing.txt
+python3 run_FTT.py --device cuda --dataset ../datasets/census-income/ --output ../results/ftt_census-income.p > ../results/ftt_census-income.txt
+python3 run_FTT.py --device cuda --dataset ../datasets/mnist-odd/ --output ../results/ftt_mnist-odd.p > ../results/ftt_mnist-odd.txt

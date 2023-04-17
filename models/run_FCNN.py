@@ -191,6 +191,7 @@ for lr in [ 0.1, 0.03, 0.01, 0.003, 0.001 ]:
 #
 with torch.no_grad():
   model = FCNN(num_inputs=xs_train.shape[1], num_hidden=128, dropout=hyper_best['dropout'])
+  model = model.to(device)
   model.load_state_dict(state_best)
   model.eval()
   ps_val = model(xs_val)

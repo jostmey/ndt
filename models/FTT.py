@@ -2,7 +2,7 @@
 # Author: Jared L. Ostmeyer
 # Date Started: 2023-03-28
 # Purpose: Transformer model for numeric, tabular data
-# Install: pip install tab-transformer-pytorch
+# Install: pip3 install tab-transformer-pytorch
 # Source: https://github.com/lucidrains/tab-transformer-pytorch
 ##########################################################################################
 
@@ -21,7 +21,7 @@ class FTT(torch.nn.Module):
     self.norm = torch.nn.BatchNorm1d(1)
     self.act = torch.nn.Sigmoid()
   def forward(self, x):
-    dummies = torch.randint(0, 5, (args.batch, 0)) # Dummy category input
+    dummies = torch.randint(0, 5, (x.shape[0], 0)) # Dummy category input
     logits = self.trans(dummies, x)
     norms = self.norm(logits)
     probabilities = self.act(norms)
