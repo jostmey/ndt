@@ -6,6 +6,8 @@ Dataset of direct marketing campaigns (phone calls) of a Portuguese banking inst
 
 [link](https://archive.ics.uci.edu/ml/datasets/bank+marketing)
 
-### Script
+To build the dataset, run the following command.
 
-Thescript `python3 build_db.py` shuffles the samples, extract the features and labels, split the samples, normalize the features, and save the results. The script was run to generate the other files in this folder.
+`python3 build_db.py`
+
+The script shuffles the samples, extract the features and labels, split the samples, normalize the features, and save the results.
