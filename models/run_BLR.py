@@ -136,7 +136,7 @@ for lr in [ 0.1, 0.03, 0.01, 0.003, 0.001 ]:
     for xs_batch, ys_batch in iter(loader_train):
       ps_batch = model(xs_batch)
       e_batch = loss_train(ps_batch, ys_batch)
-      e_train += e_batch/len(loader_train)
+      e_train += e_batch.detach()/len(loader_train)
       optimizer.zero_grad()
       e_batch.backward()
       optimizer.step()
